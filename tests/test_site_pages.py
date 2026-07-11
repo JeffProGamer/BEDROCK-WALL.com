@@ -24,7 +24,21 @@ def test_vpn_page_keeps_fetch_controls():
     assert "parseConnections" in html
 
 
-def test_site_pages_do_not_link_directly_to_local_exe():
+def test_site_pages_offer_windows_app_download():
+    download_target = ROOT / "dist-new" / "BedrockWallApp.exe"
+    assert download_target.exists()
+
     for name in ["index.html", "security.html", "vpn.html"]:
         html = (PAGES / name).read_text(encoding="utf-8")
-        assert 'href="../dist-new/BedrockWallApp.exe"' not in html
+        assert 'href="../dist-new/BedrockWallApp.exe"' in html
+        assert "download" in html
+
+
+def test_site_runner_is_packaged_for_users():
+    runner = (ROOT / "site_runner.py").read_text(encoding="utf-8")
+    spec = (ROOT / "BedrockWallSite.spec").read_text(encoding="utf-8")
+
+    assert "ThreadingHTTPServer" in runner
+    assert "webbrowser.open" in runner
+    assert "name='BedrockWallSite'" in spec
+    assert "dist-new/BedrockWallApp.exe" in spec
